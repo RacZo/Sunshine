@@ -11,35 +11,36 @@
  */
 package com.oscarsalguero.sunshine;
 
+import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
-import android.widget.TextView;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Main Activity
- *
  */
 public class MainActivity extends AppCompatActivity {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
+     * fragments for each of the sections. We use a {@link FragmentPagerAdapter} derivative,
+     * which will keep every loaded fragment in memory. If this becomes too memory intensive, it
      * may be best to switch to a
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
@@ -129,8 +130,32 @@ public class MainActivity extends AppCompatActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
+
+            String[] fakeForecastData = new String[]
+                    {
+                            "Saturday - Sunny - 88/63",
+                            "Sunday - Cloudy - 72/42",
+                            "Monday - Sunny - 88/63",
+                            "Tuesday - Sunny - 81/63",
+                            "Wednesday - Sunny - 83/63",
+                            "Thursday - Sunny - 83/63",
+                            "Friday - Showers - 74/66"
+                    };
+
+            List<String> weekForecast = new ArrayList<>();
+            weekForecast.addAll(Arrays.asList(fakeForecastData));
+
+            ArrayAdapter<String> forecastArrayAdapter = new ArrayAdapter<>(
+                    getActivity(),
+                    R.layout.list_item_forecast,
+                    R.id.list_item_forecast_text_view,
+                    weekForecast
+            );
+
+            ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
+            listView.setAdapter(forecastArrayAdapter);
+
+
             return rootView;
         }
     }
