@@ -1,6 +1,7 @@
 package com.oscarsalguero.sunshine;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -104,8 +105,12 @@ public class ForecastFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                String weatherInfo = mForecastArrayAdapter.getItem(i);
-                Toast.makeText(view.getContext(), weatherInfo, Toast.LENGTH_SHORT).show();
+                String forecast = mForecastArrayAdapter.getItem(i);
+                //Toast.makeText(view.getContext(), forecast, Toast.LENGTH_SHORT).show();
+
+                Intent intent = new Intent(getActivity(), DetailActivity.class);
+                intent.putExtra(Intent.EXTRA_TEXT, forecast);
+                getActivity().startActivity(intent);
 
             }
         });
