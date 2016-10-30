@@ -328,9 +328,11 @@ public class ForecastFragment extends Fragment {
             resultStrs[i] = day + " - " + description + " - " + highAndLow;
         }
 
+        /*
         for (String s : resultStrs) {
             Log.v(LOG_TAG, "Forecast entry: " + s);
         }
+        */
         return resultStrs;
 
     }
