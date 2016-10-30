@@ -3,6 +3,7 @@ package com.oscarsalguero.sunshine;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,6 +18,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import org.json.JSONException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -37,6 +40,7 @@ public class ForecastFragment extends Fragment {
     private static final String LOG_TAG = ForecastFragment.class.getSimpleName();
 
     private ListView mListView;
+    private String mPostalCode = "11225";
 
     /**
      * The fragment argument representing the section number for this
@@ -109,21 +113,19 @@ public class ForecastFragment extends Fragment {
         int id = item.getItemId();
         switch (id) {
             case R.id.action_refresh:
-                fetchForecastData();
+                fetchForecastData(mPostalCode);
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void fetchForecastData() {
-
-        String url = "http://api.openweathermap.org/data/2.5/forecast/daily?q=94043&mode=json&cnt=7&units=metric&appid=" + BuildConfig.OPEN_WEATHER_MAP_API_KEY;
+    private void fetchForecastData(String postalCode) {
 
         ConnectivityManager connMgr = (ConnectivityManager)
                 getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
-            new FetchWeatherTask().execute(url);
+            new FetchWeatherTask().execute(mPostalCode);
         } else {
             Log.e(LOG_TAG, "No Internet Connection");
             Toast.makeText(getActivity(), "No Internet Connection", Toast.LENGTH_SHORT).show();
@@ -133,8 +135,28 @@ public class ForecastFragment extends Fragment {
 
     private class FetchWeatherTask extends AsyncTask<String, Void, String> {
         @Override
-        protected String doInBackground(String... urls) {
+        protected String doInBackground(String... params) {
+
+            if (params.length == 0) {
+                return null;
+            }
+
             try {
+
+                Uri.Builder uriBuilder = new Uri.Builder();
+                uriBuilder.scheme("http")
+                        .authority("api.openweathermap.org")
+                        .appendPath("data")
+                        .appendPath("2.5")
+                        .appendPath("forecast")
+                        .appendPath("daily")
+                        .appendQueryParameter("q", params[0])
+                        .appendQueryParameter("cnt", "7")
+                        .appendQueryParameter("units", "metric")
+                        .appendQueryParameter("mode", "json")
+                        .appendQueryParameter("appid", BuildConfig.OPEN_WEATHER_MAP_API_KEY);
+
+                Log.v(LOG_TAG, "URL: " + uriBuilder.build().toString());
 
                 HttpURLConnection urlConnection = null;
                 BufferedReader reader = null;
@@ -142,7 +164,7 @@ public class ForecastFragment extends Fragment {
 
                 try {
 
-                    URL url = new URL(urls[0]);
+                    URL url = new URL(uriBuilder.toString());
                     urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setRequestMethod("GET");
                     urlConnection.connect();
@@ -199,11 +221,15 @@ public class ForecastFragment extends Fragment {
         @Override
         protected void onPostExecute(String result) {
 
-            Log.d(LOG_TAG, result);
+            Log.v(LOG_TAG, result);
 
-            // mListView.setAdapter();
+            try {
+                Log.v(LOG_TAG, "Max temp for day 0: " + WeatherDataParser.getMaxTemperatureForDay(result, 0));
+            } catch (JSONException e) {
+                Log.e(LOG_TAG, "Error parsing data", e);
+            }
+
         }
     }
-
 
 }
