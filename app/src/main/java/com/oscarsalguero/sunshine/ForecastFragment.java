@@ -99,7 +99,7 @@ public class ForecastFragment extends Fragment {
         mListView = (ListView) rootView.findViewById(R.id.listview_forecast);
         mListView.setAdapter(mForecastArrayAdapter);
 
-
+        fetchForecastData(mPostalCode);
         return rootView;
     }
 
