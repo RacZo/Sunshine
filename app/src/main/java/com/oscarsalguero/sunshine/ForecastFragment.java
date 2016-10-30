@@ -103,8 +103,10 @@ public class ForecastFragment extends Fragment {
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
                 String weatherInfo = mForecastArrayAdapter.getItem(i);
                 Toast.makeText(view.getContext(), weatherInfo, Toast.LENGTH_SHORT).show();
+
             }
         });
 
