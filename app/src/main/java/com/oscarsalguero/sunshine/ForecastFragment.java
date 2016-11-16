@@ -7,6 +7,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.format.Time;
@@ -34,7 +35,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -47,7 +47,9 @@ public class ForecastFragment extends Fragment {
 
     private ListView mListView;
 
-    private String mPostalCode = "11225";
+    private String mLocation = "";
+
+    private List<String> weekForecast = new ArrayList<>();
 
     private ArrayAdapter<String> mForecastArrayAdapter;
 
@@ -76,7 +78,9 @@ public class ForecastFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+
         // Dummy data
+        /*
         String[] fakeForecastData = new String[]
                 {
                         "Saturday - Sunny - 88/63",
@@ -87,9 +91,8 @@ public class ForecastFragment extends Fragment {
                         "Thursday - Sunny - 83/63",
                         "Friday - Showers - 74/66"
                 };
-
-        List<String> weekForecast = new ArrayList<>();
         weekForecast.addAll(Arrays.asList(fakeForecastData));
+        */
 
         mForecastArrayAdapter = new ArrayAdapter<>(
                 getActivity(),
@@ -115,8 +118,13 @@ public class ForecastFragment extends Fragment {
             }
         });
 
-        fetchForecastData(mPostalCode);
         return rootView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateWeather();
     }
 
     @Override
@@ -135,23 +143,29 @@ public class ForecastFragment extends Fragment {
         int id = item.getItemId();
         switch (id) {
             case R.id.action_refresh:
-                fetchForecastData(mPostalCode);
+                updateWeather();
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void fetchForecastData(String postalCode) {
-
+    private void updateWeather() {
         ConnectivityManager connMgr = (ConnectivityManager)
                 getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
-            new FetchWeatherTask().execute(mPostalCode);
+            mLocation = PreferenceManager
+                    .getDefaultSharedPreferences(getActivity())
+                    .getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
+            new FetchWeatherTask().execute(mLocation);
         } else {
             Log.e(LOG_TAG, "No Internet Connection");
             Toast.makeText(getActivity(), "No Internet Connection", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void fetchForecastData(String postalCode) {
+
 
     }
 
@@ -266,6 +280,17 @@ public class ForecastFragment extends Fragment {
      * Prepare the weather high/lows for presentation.
      */
     private String formatHighLows(double high, double low) {
+
+        String temperatureUnits = PreferenceManager
+                .getDefaultSharedPreferences(getActivity())
+                .getString(getString(R.string.pref_temperature_units_key), getString(R.string.pref_temperature_units_metric));
+        if (temperatureUnits.equalsIgnoreCase(getString(R.string.pref_temperature_units_imperial))) {
+            high = (high * 1.8) + 32;
+            low = (low * 1.8) + 32;
+        } else if (!temperatureUnits.equalsIgnoreCase(getString(R.string.pref_temperature_units_metric))) {
+            Log.d(LOG_TAG, "Temperature Unit not found: " + temperatureUnits);
+        }
+
         // For presentation, assume the user doesn't care about tenths of a degree.
         long roundedHigh = Math.round(high);
         long roundedLow = Math.round(low);
