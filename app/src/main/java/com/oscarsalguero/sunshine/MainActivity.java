@@ -12,7 +12,9 @@
 package com.oscarsalguero.sunshine;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -74,13 +76,16 @@ public class MainActivity extends AppCompatActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            startActivity(new Intent(this, SettingsActivity.class));
-            return true;
+        switch (id) {
+            case R.id.action_settings:
+                startActivity(new Intent(this, SettingsActivity.class));
+            break;
+            case R.id.action_show_preferred_location_on_map:
+                showPreferredLocationOnMap();
+            break;
+            default:
+                break;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -111,6 +116,21 @@ public class MainActivity extends AppCompatActivity {
                     return "WEATHER FORECAST";
             }
             return null;
+        }
+    }
+
+    private void showPreferredLocationOnMap() {
+        String location = PreferenceManager
+                .getDefaultSharedPreferences(this)
+                .getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        Uri geoLocation = new Uri.Builder()
+                .scheme("geo")
+                .appendQueryParameter("q", location)
+                .build();
+        intent.setData(geoLocation);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
         }
     }
 

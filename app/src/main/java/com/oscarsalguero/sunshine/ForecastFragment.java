@@ -145,6 +145,8 @@ public class ForecastFragment extends Fragment {
             case R.id.action_refresh:
                 updateWeather();
                 break;
+            default:
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
