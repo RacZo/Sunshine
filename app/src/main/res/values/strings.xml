@@ -13,7 +13,7 @@
 
     <string name="pref_location_label">Location</string>
     <string name="pref_location_key" translatable="false">location</string>
-    <string name="pref_location_default" translatable="false">11225</string>
+    <string name="pref_location_default" translatable="false">11102</string>
 
     <string name="pref_temperature_units_label">Temperature Units</string>
     <string name="pref_temperature_units_key" translatable="false">temperature_units</string>
